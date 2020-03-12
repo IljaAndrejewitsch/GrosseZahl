@@ -2,6 +2,9 @@ class GrosseZahl {
 
 	private int[] array; 
 	
+	// Default-Konstruktor, der eine Länge nimmt und eine grosse Zahl damit erzeugt
+	public GrosseZahl() {} // Notwendig, um die Konsistenz im Code zu behalten (nicht mit einfachen Arrays zu arbeiten)
+		
 	// Erzeugt eine Zahl, deren Dezimaldarstellung in d gegeben ist. d besteht ausschließlich aus Dezimalziffern.
 	public GrosseZahl(String d) {
 		array = new int[d.length()];
@@ -10,8 +13,8 @@ class GrosseZahl {
 		}
 	}
 	
-	//Hilfsmethode für GrosseZahl(int i):
-	int ziffernAnzahl(int i) { // liefert die Anzahl von Ziffern einer Zahl zurück
+	//Hilfsmethode für GrosseZahl(int i)
+	private int ziffernAnzahl(int i) { // liefert die Anzahl von Ziffern einer Zahl zurück
 		if (i != 0) { // 0 ist ein Ausnahmefall
 			int anzahl = 0; // die Anzahl von Ziffern
 			 while (i > 0) {
@@ -52,16 +55,61 @@ class GrosseZahl {
 		return false;
 	}
 
+	// Hilfsmethode für GrosseZahl add(GrosseZahl b)
+	private GrosseZahl nochEineStelle(int nullenAnzahl) { // fügt beliebig viele Nullen vor der Zahl in einem GrosseZahl.array hinzu
+							  // z.B. [1,2,3] -> [0,1,2,3]
+		GrosseZahl neueZahl = new GrosseZahl();
+		neueZahl.array = new int[this.array.length+nullenAnzahl];
+		
+		for (int i = 0; i < nullenAnzahl; i++) // die neuen Nullen
+			neueZahl.array[i] = 0;
+		
+		for (int i = 0; i < this.array.length; i++) // kopieren den übrigen Inhalt des alten Arrays
+			neueZahl.array[i+nullenAnzahl] = this.array[i];
+		
+		return neueZahl;
+	}
+	
 	// Liefert eine neue Zahl mit der Summe dieser Zahl und b. Das this-Objekt wird nicht verändert.
 	public GrosseZahl add(GrosseZahl b) {
-		int length = b.array.length; // die kleinste Länge von gegebenen Zahlen
-		if (this.array.length < b.array.length)
-			length = this.array.length;
+		GrosseZahl zahl1;
+		GrosseZahl zahl2; // Ergebnis = zahl1 + zahl2
 		
-		GrosseZahl zahl = new GrosseZahl
-		for (int i = 0; i < length; i++) {
-			this.array[this.array.length-1]
+		if (this.array.length != b.array.length) { // die Summanden zahl1 und zahl2 sollen die gleichen Längen besitzen
+			if (this.array.length < b.array.length) { // die Zahl this (das aktuelle Objekt) soll verlängert werden
+				zahl1 = this.nochEineStelle(b.array.length-this.array.length);
+				zahl2 = b;
+			}
+			else { // die Zahl b soll verlängert werden
+				zahl1 = this;
+				zahl2 = b.nochEineStelle(this.array.length-b.array.length);
+			}
 		}
+		else {
+			zahl1 = this;
+			zahl2 = b;
+		}
+		// zahl1.array.length = zahl2.array.length 
+		
+		// Addition beginnt
+		GrosseZahl ergebnis = new GrosseZahl();
+		ergebnis.array = new int[zahl1.array.length];
+		int stelleSum; // Summe an einer Stelle (min 0, max 19)
+		int rest = 0;  // Rest-Übertrag (0 oder 1)
+		for (int i = zahl1.array.length-1; i >= 0; i--) {
+			stelleSum = zahl1.array[i] + zahl2.array[i] + rest;
+			ergebnis.array[i] = stelleSum % 10; // z.B. 9+9=18, nehmen 8, Übertrag 1
+			rest = stelleSum / 10;
+		}
+		
+		if (rest != 0) { // wenn es noch einen Übertrag gibt
+			GrosseZahl groesseresErgebnis = ergebnis.nochEineStelle(1);
+			groesseresErgebnis.array[0] = rest;
+			
+			return groesseresErgebnis;
+		}
+		
+		return ergebnis;
 	}
 
 
